@@ -1,0 +1,254 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.helpezee.tutorial</groupId>
+  <artifactId>Maven</artifactId>
+  <packaging>war</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Maven Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>Maven</finalName>
+	<plugins>
+<!-- The "maven-source" plugin is used to pack your source code and deploy along with your project.
+	 This is extremely useful, for developers who use your deployed project can attach your source code for debugging. -->
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-source-plugin</artifactId>
+			<version>2.1.2</version>
+			<executions>
+				<execution>
+					<id>attach-sources</id>
+					<goals>
+						<goal>jar</goal>
+					</goals>
+				</execution>
+			</executions>
+
+		</plugin>
+<!--The Compiler Plugin is used to compile the sources of your project. 
+	Since 3.0, the default compiler is javax.tools.JavaCompiler (if you are using java 1.6) and is used to compile
+	Java sources. If you want to force the plugin using javac, you must configure the plugin option 
+	forceJavacCompilerUse.
+	Also note that at present the default source setting is 1.5 and the default target setting is 1.5, 
+	independently of the JDK you run Maven with. If you want to change these defaults, you should set source and 
+	target as described in Setting the -source and -target of the Java Compiler.  -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+					</configuration>
+				</plugin>
+<!-- The WAR Plugin is responsible for collecting all artifact dependencies, classes and resources of the 
+	 web application and packaging them into a web application archive. -->			
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.1-beta-1</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							</manifest>
+							<manifestEntries>
+								<Revision>${buildNumber}</Revision>
+								<Branch>${scmBranch}</Branch>
+								<Timestamp>${timestamp}</Timestamp>
+							</manifestEntries>
+						</archive>
+						<webResources>
+							<resource>
+								<directory>src/main/resources</directory>
+							</resource>
+							<resource>
+								<directory>webapp</directory>
+								<targetPath>WEB-INF</targetPath>
+							</resource>
+						</webResources>
+						<webXml>webapp/web.xml</webXml>
+					</configuration>
+				</plugin>
+<!--This plugin provides the capability to build jars.  -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-jar-plugin</artifactId>
+			        <version>2.4</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							</manifest>
+							<manifestEntries>
+								<Revision>${buildNumber}</Revision>
+								<Branch>${scmBranch}</Branch>
+								<Timestamp>${timestamp}</Timestamp>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>				
+<!-- The dependency plugin provides the capability to manipulate artifacts. 
+	It can copy and/or unpack artifacts from local or remote repositories to a specified location. -->		
+			  <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>package(rename to unpack)</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.cbeyond</groupId>
+									<artifactId>cbo</artifactId>
+									<version>1.0.0</version>
+									<type>jar</type>
+									<overWrite>false</overWrite>
+									<outputDirectory>${basedir}/webapp</outputDirectory>
+									<destFileName>optional-new-name.jar</destFileName>
+									<includes>**/Foot*.xsd</includes>
+									<excludes>**/*test.class</excludes>
+								</artifactItem>
+							</artifactItems>
+							<includes>**/*.xsd</includes>
+							<excludes>**/*.properties</excludes>
+							<outputDirectory>${basedir}/webapp/xsd</outputDirectory>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+<!-- The Surefire Plugin is used during the test phase of the build lifecycle to 
+  	execute the unit tests of an application. It generates reports in 2 different file formats:
+    a)Plain text files (*.txt)
+	b)XML files (*.xml)
+	By default, these files are generated at ${basedir}/target/surefire-reports. -->
+					<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.7.1</version>
+					<configuration>
+						<excludes>
+							<exclude>net/cbeyond/service/**</exclude>
+						</excludes>
+					</configuration>
+					<executions>
+						<execution>
+							<id>default-test</id>
+							<phase>test</phase>
+							<goals>
+								<goal>test</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+<!-- The JBoss Packaging Maven Plugin allows the packaging of various JBoss deployable archives including:
+		AOP - JBoss AOP Archive
+		ESB - Enterprise Service Bus Archive
+		HAR - Hibernate Archive
+		PAR - Process Archive
+		SAR - Service Archive
+		Spring - Spring BeanFactory Archive -->
+	
+		<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jboss-packaging-maven-plugin</artifactId>
+				<configuration>
+					<archive>
+					    <manifest>
+             			<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              			<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              			</manifest>
+						<manifestEntries>
+							<Revision>${buildNumber}</Revision>
+							<Branch>${scmBranch}</Branch>
+							<Timestamp>${timestamp}</Timestamp>
+						</manifestEntries>
+					</archive>
+				</configuration>
+				<version>2.2</version>
+				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<configuration>
+							<includeTypes>esb</includeTypes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+<!-- This mojo is designed to get a unique build number for each time you build your project. 
+	So while your version may remain constant at 1.0-SNAPSHOT for many iterations until release, 
+	you will have a build number that can uniquely identify each build during that time.
+	 The build number is obtained from scm, and in particular, at this time, from svn. You can then place 
+	 that build number in metadata, which can be accessed from your app, if desired.
+	 
+	The mojo also has a couple of extra functions to ensure you get the proper build number. 
+	First, your local repository is checked to make sure it is up to date. Second, your local repository is 
+	automatically updated, so that you get the latest build number. Both these functions can be suppressed, 
+	if desired.
+	
+	Optionally, you can configure this mojo to produce a revision based on a timestamp, 
+	or on a sequence, without requiring any interaction with an SCM system. Note that currently, supported 
+	SCMs are : subversion, git and mercurial. -->	
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- don't check for modified code -->
+					<doCheck>false</doCheck>
+					<!-- don't update the code -->
+					<doUpdate>false</doUpdate>
+				</configuration>
+			</plugin>
+<!-- The Maven Clean Plugin will delete the target directory by default. 
+	You may configure it to delete additional directories and files -->
+			<plugin>
+			<artifactId>maven-clean-plugin</artifactId>
+			<version>2.5</version>
+			<configuration>
+				<filesets>
+					<fileset>
+						<directory>some/relative/path</directory>
+						<includes>
+							<include>**/*.tmp</include>
+							<include>**/*.log</include>
+						</includes>
+						<excludes>
+							<exclude>**/important.log</exclude>
+							<exclude>**/another-important.log</exclude>
+						</excludes>
+						<followSymlinks>false</followSymlinks>
+					</fileset>
+				</filesets>
+			</configuration>
+		</plugin>
+	
+	</plugins>
+  </build>
+</project>
